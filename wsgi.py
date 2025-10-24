@@ -5,7 +5,9 @@ from datetime import datetime, date, time
 from App.database import db, get_migrate
 from App.models import User, Staff, Admin, Shift
 from App.main import create_app
-from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
+from App.controllers import (   create_user, get_all_users_json, get_all_users, initialize,
+                                create_staff, create_admin, clock_in, clock_out, schedule_shift,
+                                delete_shift, get_staff_shifts, generate_report, get_combined_roster )
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -61,12 +63,15 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 @click.argument("username", default="staff0")
 @click.argument("password", default="staffpass")
 def create_staff_command(username, password):
-    staff = Staff(username=username, password=password, role='staff')
-    db.session.add(staff)
-    db.session.commit()
-    print(f'Staff {username} created!')
+    try:
+        result, error = create_staff(username, password)
+        if error:
+            print(f"Error: {error}")
+        else:
+            print(f"Staff {username} created!")
+    except Exception as e:
+        print(f"Error: {e}")
 
-# Note original CLI commands for clock in and clock out, directly call the model methods, therefore, they must be updated to utilize the controller instead, for view implementation
 @staff_cli.command("clock-in", help="Clock in for current shift")
 @click.argument("username")
 def staff_clock_in_command(username):
@@ -75,8 +80,11 @@ def staff_clock_in_command(username):
         print(f"Staff member {username} not found")
         return
     try:
-        result = staff.clock_in() # direct call of method in model
-        print(result)
+        result, error = clock_in(staff.id) # updated :)
+        if error:
+            print(f"Error: {error}")
+        else:
+            print(result)
     except Exception as e:
         print(f"Error: {e}")
 
@@ -88,8 +96,11 @@ def staff_clock_out_command(username):
         print(f"Staff member {username} not found")
         return
     try:
-        result = staff.clock_out() # direct call of method in model
-        print(result)
+        result, error = clock_out(staff.id) # updated :)
+        if error:
+            print(f"Error: {error}")
+        else:
+            print(result)
     except Exception as e:
         print(f"Error: {e}")
 
@@ -106,11 +117,10 @@ def staff_view_roster_command(username, start_date, end_date):
         start = date.fromisoformat(start_date)
         end = date.fromisoformat(end_date)
         
-        # Get all shifts for all staff in the date range
-        shifts = Shift.query.filter(
-            Shift.date.between(start, end)
-        ).order_by(Shift.date, Shift.start_time).all()
-        
+        shifts, error = get_combined_roster(start, end)
+        if error:
+            print(f"Error: {error}")
+            return
         if not shifts:
             print("No shifts found for the given date range")
             return
