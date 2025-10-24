@@ -33,9 +33,10 @@ def update_user(id, username):
         return True
     return None
 
+def get_staff_members():
+    staff = User.query.filter_by(role='staff').all()
+    return [s.get_json() for s in staff] if staff else []
 
-def get_staff_members(cls):
-    return cls.query.filter_by(role='staff').all()
-d
-def get_admins(cls):
-    return cls.query.filter_by(role='admin').all()
+def get_admins():
+    admin = User.query.filter_by(role='staff').all()
+    return [a.get_json() for a in admin] if admin else []
