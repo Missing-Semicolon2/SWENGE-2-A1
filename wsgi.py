@@ -165,10 +165,14 @@ admin_cli = AppGroup('admin', help='Admin object commands')
 @click.argument("username", default="admin0")
 @click.argument("password", default="adminpass")
 def create_admin_command(username, password):
-    admin = Admin(username=username, password=password, role='admin')
-    db.session.add(admin)
-    db.session.commit()
-    print(f'Admin {username} created!')
+    try:
+        result, error = create_admin(username, password)
+        if error:
+            print(f"Error: {error}")
+        else:
+            print(f"Admin {username} created!")
+    except Exception as e:
+        print(f"Error: {e}")
 
 @admin_cli.command("schedule-shift", help="Schedule a shift for staff")
 @click.argument("staff_username")
@@ -181,18 +185,16 @@ def admin_schedule_shift_command(staff_username, shift_date, start_time, end_tim
         print(f"Staff member {staff_username} not found")
         return
     
-    admin = Admin.query.first()  # Get first admin user
-    if not admin:
-        print("No admin user found")
-        return
-    
     try:
         shift_date_obj = date.fromisoformat(shift_date)
         start_time_obj = time.fromisoformat(start_time)
         end_time_obj = time.fromisoformat(end_time)
         
-        shift = admin.schedule_shift(staff.id, shift_date_obj, start_time_obj, end_time_obj)
-        print(f"Shift scheduled: {shift}")
+        result, error = schedule_shift(staff.id, shift_date_obj, start_time_obj, end_time_obj)
+        if error:
+            print(f"Error: {error}")
+        else:
+            print(f"Shift scheduled: {result}")
     except Exception as e:
         print(f"Error: {e}")
 
@@ -200,14 +202,11 @@ def admin_schedule_shift_command(staff_username, shift_date, start_time, end_tim
 @admin_cli.command("delete-shift", help="Delete a shift")
 @click.argument("shift_id")
 def admin_delete_shift_command(shift_id):
-    admin = Admin.query.first()
-    if not admin:
-        print("No admin user found")
-        return
-    
     try:
-        result = admin.delete_shift(int(shift_id))
-        if result:
+        result, error = delete_shift(int(shift_id))
+        if error:
+            print(f"Error: {error}")
+        elif result:
             print(f"Shift {shift_id} deleted successfully")
         else:
             print(f"Shift {shift_id} not found")
@@ -218,15 +217,13 @@ def admin_delete_shift_command(shift_id):
 @click.argument("start_date")
 @click.argument("end_date")
 def admin_generate_report_command(start_date, end_date):
-    admin = Admin.query.first()
-    if not admin:
-        print("No admin user found")
-        return
-    
     try:
         start = date.fromisoformat(start_date)
         end = date.fromisoformat(end_date)
-        report = admin.generate_report(start, end)
+        report, error = generate_report(start, end)
+        if error:
+            print(f"Error: {error}")
+            return
         
         print(f"Shift Report for {start} to {end}:")
         print("-" * 50)
@@ -247,16 +244,14 @@ def admin_list_shifts_command(staff_username, start_date, end_date):
     if not staff:
         print(f"Staff member {staff_username} not found")
         return
-    
-    admin = Admin.query.first()
-    if not admin:
-        print("No admin user found")
-        return
-    
+
     try:
         start = date.fromisoformat(start_date)
         end = date.fromisoformat(end_date)
-        shifts = admin.get_staff_shifts(staff.id, start, end)
+        shifts, error = get_staff_shifts(staff.id, start, end)
+        if error:
+            print(f"Error: {error}")
+            return
         
         print(f"Shifts for {staff_username} from {start} to {end}:")
         print("-" * 50)
