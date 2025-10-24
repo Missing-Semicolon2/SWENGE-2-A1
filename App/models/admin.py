@@ -33,7 +33,6 @@ class Admin(User):
                 raise RuntimeError(f'Shift conflicts with existing shift: {other.id}')
         
         db.session.add(new_shift)
-        db.session.commit()
         return new_shift
 
     def delete_shift(self, shift_id):
@@ -45,7 +44,6 @@ class Admin(User):
             raise RuntimeError('Cannot delete a shift that has already started')
         
         db.session.delete(shift)
-        db.session.commit()
         return True
 
     def get_staff_shifts(self, staff_id, start_date, end_date):
