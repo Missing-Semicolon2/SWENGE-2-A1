@@ -34,17 +34,7 @@ class User(db.Model):
         """Check hashed password."""
         return check_password_hash(self.password, password)
 
-    @classmethod
-    def get_by_username(cls, username):
-        return cls.query.filter_by(username=username).first()
-
-    @classmethod
-    def get_staff_members(cls):
-        return cls.query.filter_by(role='staff').all()
-
-    @classmethod
-    def get_admins(cls):
-        return cls.query.filter_by(role='admin').all()
+    
 
     def is_staff(self):
         return self.role == 'staff'

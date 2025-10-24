@@ -1,4 +1,4 @@
-from App.models import User
+from App.models import User, Staff, Admin
 from App.database import db
 
 def create_user(username, password):
@@ -32,3 +32,10 @@ def update_user(id, username):
         db.session.commit()
         return True
     return None
+
+
+def get_staff_members(cls):
+    return cls.query.filter_by(role='staff').all()
+d
+def get_admins(cls):
+    return cls.query.filter_by(role='admin').all()
