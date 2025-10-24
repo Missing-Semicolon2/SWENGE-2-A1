@@ -66,6 +66,7 @@ def create_staff_command(username, password):
     db.session.commit()
     print(f'Staff {username} created!')
 
+# Note original CLI commands for clock in and clock out, directly call the model methods, therefore, they must be updated to utilize the controller instead, for view implementation
 @staff_cli.command("clock-in", help="Clock in for current shift")
 @click.argument("username")
 def staff_clock_in_command(username):
@@ -74,7 +75,7 @@ def staff_clock_in_command(username):
         print(f"Staff member {username} not found")
         return
     try:
-        result = staff.clock_in()
+        result = staff.clock_in() # direct call of method in model
         print(result)
     except Exception as e:
         print(f"Error: {e}")
@@ -87,7 +88,7 @@ def staff_clock_out_command(username):
         print(f"Staff member {username} not found")
         return
     try:
-        result = staff.clock_out()
+        result = staff.clock_out() # direct call of method in model
         print(result)
     except Exception as e:
         print(f"Error: {e}")
