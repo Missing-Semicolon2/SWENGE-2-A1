@@ -1,5 +1,7 @@
+from flask import jsonify
 from App.models import User, Staff, Admin
 from App.database import db
+from sqlalchemy.exc import IntegrityError
 
 def create_user(username, password):
     newuser = User(username=username, password=password)
